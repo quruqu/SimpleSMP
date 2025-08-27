@@ -1,6 +1,8 @@
 name: SimpleSMP
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: me.ujun.simplesmp.SimpleSMP
 api-version: '1.21'
 commands:
   bed:
+  xpbottle:
+  randomspawn:

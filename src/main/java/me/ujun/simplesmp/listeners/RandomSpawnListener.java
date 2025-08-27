@@ -1,5 +1,7 @@
-package me.ujun.simplesmp;
+package me.ujun.simplesmp.listeners;
 
+import me.ujun.simplesmp.SimpleSMP;
+import me.ujun.simplesmp.config.ConfigHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-public class Listener implements org.bukkit.event.Listener {
+public class RandomSpawnListener implements org.bukkit.event.Listener {
 
     private final Random random = new Random();
     private final Map<UUID, Boolean> noSpawnPoints = new HashMap<>();
@@ -27,10 +29,16 @@ public class Listener implements org.bukkit.event.Listener {
         Location bedLocation = player.getBedSpawnLocation();
 
         if (bedLocation == null) {
-            player.setBedSpawnLocation(randomLocation(), true);
+            Location spawnLocation = SimpleSMP.playerSpawnLocations.get(player.getUniqueId());
+
+            player.setBedSpawnLocation(spawnLocation, true);
             noSpawnPoints.put(player.getUniqueId(), true);
         }
 
+
+        if (!ConfigHandler.showDeathLocation) {
+            return;
+        }
 
         Location deathLocation = player.getLocation();
 
@@ -40,8 +48,14 @@ public class Listener implements org.bukkit.event.Listener {
         int z = (int) deathLocation.getZ();
 
 
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            onlinePlayer.sendMessage(ChatColor.GOLD + player.getName() + "님의 " + ChatColor.RED + "사망 위치:" + ChatColor.GOLD + " X: " + x + " Y: " + y + " Z: " + z + " (" + player.getWorld().getName() +  ")");
+        if (ConfigHandler.onlyShowDeathLocationInSameWorld) {
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayer.getWorld().equals(player.getWorld())) {
+                    onlinePlayer.sendMessage(ChatColor.GOLD + player.getName() + "님의 " + ChatColor.RED + "사망 위치:" + ChatColor.GOLD + " X: " + x + " Y: " + y + " Z: " + z);
+                }
+            }
+        } else {
+            Bukkit.broadcastMessage(ChatColor.GOLD + player.getName() + "님의 " + ChatColor.RED + "사망 위치:" + ChatColor.GOLD + " X: " + x + " Y: " + y + " Z: " + z + " (" + player.getWorld().getName() +  ")");
         }
     }
 
@@ -60,12 +74,15 @@ public class Listener implements org.bukkit.event.Listener {
     private void firstJoinEvent(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (!player.hasPlayedBefore()) {
-            player.teleport(randomLocation());
+        if (!SimpleSMP.playerSpawnLocations.containsKey(player.getUniqueId())) {
+            Location spawnLocation = randomLocation();
+            player.teleport(spawnLocation);
+            SimpleSMP.playerSpawnLocations.put(player.getUniqueId(), spawnLocation);
+
         }
     }
 
-    private Location randomLocation() {
+    public Location randomLocation() {
         World world = Bukkit.getWorld("world");
 
         int x = random.nextInt(4001) - 2000; // -1000 ~ +1000

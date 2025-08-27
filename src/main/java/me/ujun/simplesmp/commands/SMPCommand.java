@@ -1,5 +1,7 @@
-package me.ujun.simplesmp;
+package me.ujun.simplesmp.commands;
 
+import me.ujun.simplesmp.SimpleSMP;
+import me.ujun.simplesmp.listeners.RandomSpawnListener;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,11 +10,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class Commands implements CommandExecutor {
+public class SMPCommand implements CommandExecutor {
 
     private final JavaPlugin plugin;
+    private RandomSpawnListener randomSpawnListener = new RandomSpawnListener();
 
-    public Commands(JavaPlugin plugin) {
+    public SMPCommand(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -25,9 +28,11 @@ public class Commands implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-        Location bedLocation = player.getBedSpawnLocation();
+
 
         if (command.getName().equals("bed")) {
+            Location bedLocation = player.getBedSpawnLocation();
+
 
             if (bedLocation == null) {
                 player.sendMessage("침대가 설정되어 있지 않습니다!");
@@ -52,6 +57,11 @@ public class Commands implements CommandExecutor {
             }.runTaskLater(plugin, 60L);
 
             return true;
+        } else if (command.getName().equals("randomspawn")) {
+            Location newSpawnPoint = randomSpawnListener.randomLocation();
+
+            SimpleSMP.playerSpawnLocations.put(player.getUniqueId(), newSpawnPoint);
+            player.sendMessage("§6스폰포인트를 재생성했습니다!");
         }
 
         return false;

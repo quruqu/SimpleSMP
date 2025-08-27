@@ -1,0 +1,13 @@
+fight_time: 15
+fight_message: "§c§l%sec%초 후 전투가 종료됩니다"
+fight_end_message: "§c§l싸움이 끝났습니다"
+explosion_damage_percent: 30
+blocked-commands-during-fight:
+  - /team
+  - /bed
+
+
+xpbottle_diamond_rate: 10
+netherrack_despawn_time: 1000
+show_death_location: true
+only_show_death_location_in_same_world: true
