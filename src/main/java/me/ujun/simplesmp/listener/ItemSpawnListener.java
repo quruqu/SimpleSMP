@@ -1,4 +1,4 @@
-package me.ujun.simplesmp.listeners;
+package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.config.ConfigHandler;
 import org.bukkit.Material;
@@ -6,8 +6,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
-
-import java.net.http.WebSocket;
 
 public class ItemSpawnListener implements Listener {
     @EventHandler

@@ -1,11 +1,8 @@
-package me.ujun.simplesmp.listeners;
+package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.SimpleSMP;
 import me.ujun.simplesmp.config.ConfigHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -85,13 +82,19 @@ public class RandomSpawnListener implements org.bukkit.event.Listener {
     public Location randomLocation() {
         World world = Bukkit.getWorld("world");
 
-        int x = random.nextInt(4001) - 2000; // -1000 ~ +1000
-        int z = random.nextInt(4001) - 2000; // -1000 ~ +1000
-        int y = world.getHighestBlockYAt(x, z) + 1; // 지형 높이 위로 설정
+        while (true) {
 
-        Location location = new Location(world, x + 0.5, y, z + 0.5);
+            int x = random.nextInt(4001) - 2000; // -1000 ~ +1000
+            int z = random.nextInt(4001) - 2000; // -1000 ~ +1000
+            int y = world.getHighestBlockYAt(x, z); // 지형 높이 위로 설정
 
-        return location;
+            if (world.getHighestBlockAt(x, z).getType() == Material.LAVA) {
+                continue;
+            }
+
+            return new Location(world, x + 0.5, y + 1, z + 0.5);
+        }
+
     }
 
 }

@@ -1,4 +1,4 @@
-package me.ujun.simplesmp.listeners;
+package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.DisplayGroup;
 import me.ujun.simplesmp.SimpleSMP;
@@ -17,10 +17,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.w3c.dom.css.CSSImportRule;
 
-import javax.swing.plaf.SplitPaneUI;
 import java.util.*;
 
 public class PvpListener implements Listener {

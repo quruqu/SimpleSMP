@@ -1,4 +1,4 @@
-package me.ujun.simplesmp.listeners;
+package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.config.ConfigHandler;
 import org.bukkit.entity.Entity;

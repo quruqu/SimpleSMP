@@ -1,7 +1,7 @@
 package me.ujun.simplesmp.commands;
 
 import me.ujun.simplesmp.SimpleSMP;
-import me.ujun.simplesmp.listeners.RandomSpawnListener;
+import me.ujun.simplesmp.listener.RandomSpawnListener;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

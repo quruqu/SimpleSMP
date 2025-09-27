@@ -3,10 +3,10 @@ package me.ujun.simplesmp;
 import me.ujun.simplesmp.commands.SMPCommand;
 import me.ujun.simplesmp.commands.XpCommand;
 import me.ujun.simplesmp.config.ConfigHandler;
-import me.ujun.simplesmp.listeners.ExplosionListener;
-import me.ujun.simplesmp.listeners.ItemSpawnListener;
-import me.ujun.simplesmp.listeners.PvpListener;
-import me.ujun.simplesmp.listeners.RandomSpawnListener;
+import me.ujun.simplesmp.listener.ExplosionListener;
+import me.ujun.simplesmp.listener.ItemSpawnListener;
+import me.ujun.simplesmp.listener.PvpListener;
+import me.ujun.simplesmp.listener.RandomSpawnListener;
 import me.ujun.simplesmp.savings.DataFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -100,6 +100,11 @@ public final class SimpleSMP extends JavaPlugin {
             }
         }.runTaskTimer(this, 0L, 20L);
 
+
+        // todo
+        // 겉날개 엔드에서 비활성화: config에서 true,false
+        // 죽으면 일정 확률로 템 잃게
+        // 토템 너프
     }
 
 }
