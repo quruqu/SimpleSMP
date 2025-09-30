@@ -1,13 +1,11 @@
 package me.ujun.simplesmp;
 
-import me.ujun.simplesmp.commands.SMPCommand;
-import me.ujun.simplesmp.commands.XpCommand;
+import me.ujun.simplesmp.command.ReloadCommand;
+import me.ujun.simplesmp.command.SMPCommand;
+import me.ujun.simplesmp.command.XpCommand;
 import me.ujun.simplesmp.config.ConfigHandler;
-import me.ujun.simplesmp.listener.ExplosionListener;
-import me.ujun.simplesmp.listener.ItemSpawnListener;
-import me.ujun.simplesmp.listener.PvpListener;
-import me.ujun.simplesmp.listener.RandomSpawnListener;
-import me.ujun.simplesmp.savings.DataFile;
+import me.ujun.simplesmp.listener.*;
+import me.ujun.simplesmp.saving.DataFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -40,12 +38,13 @@ public final class SimpleSMP extends JavaPlugin {
         getCommand("bed").setExecutor(new SMPCommand(this));
         getCommand("randomspawn").setExecutor(new SMPCommand(this));
         getCommand("xpbottle").setExecutor(new XpCommand());
+        getCommand("simplesmp-reload").setExecutor(new ReloadCommand(this));
         Bukkit.getPluginManager().registerEvents(new RandomSpawnListener(), this);
         Bukkit.getPluginManager().registerEvents(new PvpListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ExplosionListener(), this);
         Bukkit.getPluginManager().registerEvents(new ItemSpawnListener(), this);
-
-
+        Bukkit.getPluginManager().registerEvents(new GlideListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new MaceHitListener(), this);
 
          run();
     }
@@ -60,51 +59,52 @@ public final class SimpleSMP extends JavaPlugin {
     }
 
 
+
+
     private void run() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+            for (UUID uuid : new HashSet<>(pvpPlayerTimer.keySet())) {
 
-                Iterator<UUID> iterator = pvpPlayerTimer.keySet().iterator();
-                while (iterator.hasNext()) {
-                    UUID uuid = iterator.next();
+                int sec = pvpPlayerTimer.get(uuid);
+                Player player = Bukkit.getPlayer(uuid);
+                String fightMessage = ConfigHandler.fightMessage;
+                fightMessage = fightMessage.replace("%sec%", String.valueOf(sec));
 
-                    int sec = pvpPlayerTimer.get(uuid);
-                    Player player = Bukkit.getPlayer(uuid);
-                    String fightMessage = ConfigHandler.fightMessage;
-                    fightMessage = fightMessage.replace("%sec%", String.valueOf(sec));
-
-                    if (sec == 0) {
-                        if (player != null) {
-                            player.sendActionBar(ConfigHandler.fightEndMessage);
-                        } else {
-                            PvpListener.removePlayerDisplay(uuid);
-                        }
-                        iterator.remove();
-                        continue;
+                if (sec == 0) {
+                    if (player != null) {
+                        player.sendActionBar(ConfigHandler.fightEndMessage);
                     } else {
-                        if (player != null) {
-                            player.sendActionBar(fightMessage);
-                        }
-
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-
-                        if (!offlinePlayer.isOnline()) {
-                            DisplayGroup displayGroup = playerDisplayGroup.get(uuid);
-                            displayGroup.itemDisplay.setCustomName("§l" + offlinePlayer.getName() + ": " + fightMessage);
-                        }
+                        PvpListener.removePlayerDisplay(uuid);
+                    }
+                    pvpPlayerTimer.remove(uuid);
+                    continue;
+                } else {
+                    if (player != null) {
+                        player.sendActionBar(fightMessage);
                     }
 
-                    pvpPlayerTimer.put(uuid, sec-1);
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+
+                    if (!offlinePlayer.isOnline()) {
+                        DisplayGroup displayGroup = playerDisplayGroup.get(uuid);
+                        displayGroup.itemDisplay.setCustomName("§l" + offlinePlayer.getName() + ": " + fightMessage);
+                    }
                 }
+
+                pvpPlayerTimer.put(uuid, sec - 1);
             }
-        }.runTaskTimer(this, 0L, 20L);
+        }, 0L, 20L);
+
 
 
         // todo
-        // 겉날개 엔드에서 비활성화: config에서 true,false
-        // 죽으면 일정 확률로 템 잃게
-        // 토템 너프
+        // 엔드 주말에 열림
+        // 블레이즈 스포너 못 부숨
+        // 현실시간으로 자는 시간에는 겉날개 너프
+        // 엔더 드래곤 버프
+        // 죽을 시 확률적으로 아이템 삭제
+        // 엔더상자에 셜커상자 못 넣음
+        // 엔드에 오래 있으면 패널티
     }
 
 }

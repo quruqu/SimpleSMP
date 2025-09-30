@@ -1,4 +1,4 @@
-package me.ujun.simplesmp.commands;
+package me.ujun.simplesmp.command;
 
 import me.ujun.simplesmp.SimpleSMP;
 import me.ujun.simplesmp.listener.RandomSpawnListener;
@@ -22,12 +22,10 @@ public class SMPCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("플레이어만 사용할 수 있습니다.");
             return true;
         }
-
-        Player player = (Player) sender;
 
 
         if (command.getName().equals("bed")) {

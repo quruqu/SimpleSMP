@@ -195,9 +195,8 @@ public class PvpListener implements Listener {
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerAttack(EntityDamageByEntityEvent event) {
-        if (event.isCancelled()) return;
 
         Player attacker;
         Projectile projectile;

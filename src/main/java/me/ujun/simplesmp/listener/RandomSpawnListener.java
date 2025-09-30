@@ -68,7 +68,7 @@ public class RandomSpawnListener implements org.bukkit.event.Listener {
     }
 
     @EventHandler
-    private void firstJoinEvent(PlayerJoinEvent event) {
+    private void onFirstJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
         if (!SimpleSMP.playerSpawnLocations.containsKey(player.getUniqueId())) {

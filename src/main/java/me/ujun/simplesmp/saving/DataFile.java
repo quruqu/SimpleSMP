@@ -1,6 +1,5 @@
-package me.ujun.simplesmp.savings;
+package me.ujun.simplesmp.saving;
 
-import net.kyori.adventure.text.BlockNBTComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -84,7 +83,6 @@ public class DataFile {
             dataConfig.set(path + ".yaw", loc.getYaw());
             dataConfig.set(path + ".pitch", loc.getPitch());
 
-            Bukkit.getLogger().info("asdf");
             Bukkit.getLogger().info("Config file location: " + dataFile.getAbsolutePath());
         }
 
