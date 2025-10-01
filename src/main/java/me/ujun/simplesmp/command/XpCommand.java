@@ -45,10 +45,8 @@ public class XpCommand implements CommandExecutor {
                 return true;
             }
 
-            // 다이아몬드 차감
             p.getInventory().removeItem(new ItemStack(Material.DIAMOND, diamondsToUse));
 
-            // 경험치 병 지급
             ItemStack bottles = new ItemStack(Material.EXPERIENCE_BOTTLE, diamondsToUse * ConfigHandler.xpBottleDiamondRate);
             Map<Integer, ItemStack> leftover = p.getInventory().addItem(bottles);
 

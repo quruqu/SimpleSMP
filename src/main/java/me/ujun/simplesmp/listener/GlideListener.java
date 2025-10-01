@@ -2,31 +2,21 @@ package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.SimpleSMP;
 import me.ujun.simplesmp.config.ConfigHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.nio.Buffer;
-import java.util.UUID;
+import java.time.LocalTime;
 
 public class GlideListener implements Listener {
     private final JavaPlugin plugin;
@@ -56,8 +46,6 @@ public class GlideListener implements Listener {
                     damage *= level;
                 }
 
-
-
                 if (durability - damage > 0) {
                     e.setDamage(damage);
                 } else {
@@ -86,10 +74,12 @@ public class GlideListener implements Listener {
             return;
         }
 
-        if (ConfigHandler.elytraDisableDimension.contains(p.getWorld().getEnvironment())) {
+        int hour = LocalTime.now().getHour();
+
+        if (ConfigHandler.elytraDisableDimension.contains(p.getWorld().getEnvironment()) || isWithinRange(hour)) {
             if (e.isGliding()) {
                 e.setCancelled(true);
-                p.sendActionBar("§c해당 차원에서는 겉날개를 사용할 수 없습니다");
+                p.sendActionBar("§c겉날개를 사용할 수 없습니다");
             }
         }
     }
@@ -120,6 +110,16 @@ public class GlideListener implements Listener {
             if (ConfigHandler.elytraDisableDimension.contains(p.getWorld().getEnvironment())) {
                 p.sendMessage("§c§l[주의] §f§l겉날개를 사용할 수 없는 차원입니다");
             }
+        }
+    }
+
+    boolean isWithinRange(int current) {
+        if (ConfigHandler.elytraDisabledTimeStart == ConfigHandler.elytraDisabledTimeEnd) return false;
+
+        if (ConfigHandler.elytraDisabledTimeStart < ConfigHandler.elytraDisabledTimeEnd) {
+            return current >= ConfigHandler.elytraDisabledTimeStart && current < ConfigHandler.elytraDisabledTimeEnd;
+        } else {
+            return current >= ConfigHandler.elytraDisabledTimeStart || current < ConfigHandler.elytraDisabledTimeEnd;
         }
     }
 }

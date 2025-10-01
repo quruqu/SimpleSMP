@@ -13,7 +13,6 @@ public class ItemSpawnListener implements Listener {
         Item item = event.getEntity();
 
         if (item.getItemStack().getType() == Material.NETHERRACK) {
-            // 100 ticks = 5초
             item.setTicksLived(6000 - ConfigHandler.netherrackDespawnTime);
         }
     }

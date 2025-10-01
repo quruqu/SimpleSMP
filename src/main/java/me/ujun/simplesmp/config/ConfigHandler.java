@@ -32,6 +32,11 @@ public class ConfigHandler {
     public static int elytraDamageDuringFight;
     public static int maceCooldownPerDamage;
     public static double totemDropChance;
+    public static boolean isBlazeSpawnerProtected;
+    public static int elytraDisabledTimeStart;
+    public static int elytraDisabledTimeEnd;
+    public static int endDimensionOpenTime;
+    public static int endDimensionCloseTime;
 
 
 
@@ -62,7 +67,7 @@ public class ConfigHandler {
         netherrackDespawnTime = config.getInt("netherrack_despawn_time");
         onlyShowDeathLocationInSameWorld = config.getBoolean("only_show_death_location_in_same_world");
         showDeathLocation = config.getBoolean("show_death_location");
-        List<String> keyList = Objects.requireNonNull(config.getStringList("elytra_disable_dimension"));
+        List<String> keyList = Objects.requireNonNull(config.getStringList("elytra_disabled_dimension"));
         for (String key : keyList) {
             World.Environment env = envMap.get(key);
             if (env != null) {
@@ -73,6 +78,11 @@ public class ConfigHandler {
         elytraDamageDuringFight = config.getInt("elytra_damage_during_fight");
         maceCooldownPerDamage = config.getInt("mace_cooldown_per_damage");
         totemDropChance = config.getDouble("totem_drop_chance");
+        isBlazeSpawnerProtected = config.getBoolean("is_blaze_spawner_protected", true);
+        elytraDisabledTimeStart = config.getInt("elytra_disabled_time_start");
+        elytraDisabledTimeEnd = config.getInt("elytra_disabled_time_end");
+        endDimensionOpenTime = config.getInt("end_dimension_open_time");
+        endDimensionCloseTime = config.getInt("end_dimension_close_time");
 
     }
 }

@@ -13,9 +13,19 @@ show_death_location: true
 only_show_death_location_in_same_world: true
 
 # normal | end | nether
-elytra_disable_dimension:
+elytra_disabled_dimension:
   - end
+
 # default: 1
 elytra_damage_during_fight: 2
 mace_cooldown_per_damage: 2
 totem_drop_chance: 0.2
+is_blaze_spawner_protected: true
+
+# ex) set start: 21 and end: 7 -> 21:00 ~ 6:59
+elytra_disabled_time_start: 21
+elytra_disabled_time_end: 7
+
+# 0~167
+end_dimension_open_time: 133
+end_dimension_close_time: 0
