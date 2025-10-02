@@ -52,7 +52,15 @@ public class EndRestrictListener implements Listener {
             return;
         }
 
-        int leftHour = ConfigHandler.endDimensionOpenTime - 1 - currentHour;
+
+        int leftHour = -1;
+        if (currentHour < ConfigHandler.endDimensionOpenTime) {
+            leftHour += ConfigHandler.endDimensionOpenTime - currentHour;
+        } else if (currentHour > ConfigHandler.endDimensionOpenTime) {
+            leftHour += ConfigHandler.endDimensionOpenTime - currentHour + 168;
+        } else {
+            leftHour = 0;
+        }
         Component leftHourComponent = Component.text(String.format("%d일 %d시간", leftHour/24, leftHour%24));
 
         if (leftHour == 0) {
