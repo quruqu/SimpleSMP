@@ -51,6 +51,7 @@ public final class SimpleSMP extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new SpawnerProtectListener(), this);
         Bukkit.getPluginManager().registerEvents(new EndRestrictListener(this), this);
         Bukkit.getPluginManager().registerEvents(new DragonEggProtectListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), this);
 
          run();
     }
