@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,7 +25,7 @@ public class EndRestrictListener implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentHour = getCurrentHour();
 
-            if (isWithinRange(currentHour)) {
+            if (currentHour != ConfigHandler.endDimensionCloseTime) {
                 return;
             }
 
@@ -41,6 +42,27 @@ public class EndRestrictListener implements Listener {
                 }
             }
         }, 0, 20L);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player p = event.getPlayer();
+        int currentHour = getCurrentHour();
+
+        if (isWithinRange(currentHour)) {
+            return;
+        }
+
+        if (p.getWorld().getEnvironment().equals(World.Environment.THE_END)) {
+            Location loc = p.getBedSpawnLocation();
+
+            if (loc == null) {
+                loc = SimpleSMP.playerSpawnLocations.get(p.getUniqueId());
+            }
+
+            p.sendMessage(ChatColor.RED + "엔드가 비활성화되어 강제퇴장됩니다");
+            p.teleport(loc);
+        }
     }
 
 
