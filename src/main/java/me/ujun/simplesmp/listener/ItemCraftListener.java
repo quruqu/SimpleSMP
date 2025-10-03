@@ -25,6 +25,8 @@ public class ItemCraftListener implements Listener {
     public void onPrepareCraft(PrepareItemCraftEvent event) {
         ItemStack result = event.getInventory().getResult();
 
+        if (result == null) return;
+
         if (result.getType() == Material.FIREWORK_ROCKET) {
             result.setData(DataComponentTypes.MAX_STACK_SIZE, 32);
         }}

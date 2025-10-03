@@ -24,7 +24,7 @@ public class MaceHitListener implements Listener {
             }
 
             int damage = (int) e.getDamage();
-            p.sendMessage(String.valueOf(damage));
+//            p.sendMessage(String.valueOf(damage));
             p.setCooldown(Material.MACE, ConfigHandler.maceCooldownPerDamage * damage);
         }
     }

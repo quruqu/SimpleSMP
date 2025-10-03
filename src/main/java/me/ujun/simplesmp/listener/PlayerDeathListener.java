@@ -127,7 +127,7 @@ public class PlayerDeathListener implements Listener {
                 weight += lvl;
             }
         }
-        Bukkit.broadcast(Component.text(item.getType() + ": " + weight + " | " + rarity + " | " + rarity));
+//        Bukkit.broadcast(Component.text(item.getType() + ": " + weight + " | " + rarity + " | " + rarity));
 
         return weight;
     }
