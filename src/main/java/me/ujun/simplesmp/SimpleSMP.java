@@ -69,10 +69,6 @@ public final class SimpleSMP extends JavaPlugin {
 
 
     private void run() {
-        final int[] lastHour = { -1 };
-        final int[] lastMinute = { -1 };
-        final List<Integer> warningMinute = Arrays.asList(1, 5, 10, 30);
-
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (UUID uuid : new HashSet<>(pvpPlayerTimer.keySet())) {
 
@@ -103,34 +99,6 @@ public final class SimpleSMP extends JavaPlugin {
                 }
 
                 pvpPlayerTimer.put(uuid, sec - 1);
-            }
-
-
-            int currentHour = LocalTime.now().getHour();
-
-            if (currentHour != lastHour[0]) {
-                lastHour[0] = currentHour;
-
-                if (currentHour == ConfigHandler.elytraDisabledTimeStart - 1) {
-                    Bukkit.broadcast(Component.text("1시간 후 겉날개 사용이 제한됩니다"));
-                } else if (currentHour == ConfigHandler.elytraDisabledTimeStart) {
-                    Bukkit.broadcast(Component.text("같날개 사용이 제한됩니다"));
-                } else if (currentHour == ConfigHandler.elytraDisabledTimeEnd) {
-                    Bukkit.broadcast(Component.text("같날개 사용 제한이 해제됩니다"));
-                }
-            }
-
-            if (currentHour == ConfigHandler.elytraDisabledTimeStart - 1) {
-                int currentMinute = LocalTime.now().getMinute();
-
-                if (currentMinute != lastMinute[0]) {
-                    lastMinute[0] = currentMinute;
-
-                    int leftMin = 60 - currentMinute;
-                    if (warningMinute.contains(leftMin)) {
-                        Bukkit.broadcast(Component.text(String.format("%d분 후 겉날개 사용이 제한됩니다.", leftMin)));
-                    }
-                }
             }
         }, 0L, 20L);
 

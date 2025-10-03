@@ -52,7 +52,7 @@ public class RandomSpawnListener implements org.bukkit.event.Listener {
                 }
             }
         } else {
-            Bukkit.broadcastMessage(ChatColor.GOLD + player.getName() + "님의 " + ChatColor.RED + "사망 위치:" + ChatColor.GOLD + " X: " + x + " Y: " + y + " Z: " + z + " (" + player.getWorld().getName() +  ")");
+            Bukkit.broadcastMessage(ChatColor.GOLD + player.getName() + "님의 " + ChatColor.RED + "사망 위치:" + ChatColor.GOLD + " X: " + x + " Y: " + y + " Z: " + z + " (" + player.getWorld().getName() + ")");
         }
     }
 

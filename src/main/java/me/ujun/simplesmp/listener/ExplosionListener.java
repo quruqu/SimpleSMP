@@ -10,11 +10,11 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 public class ExplosionListener implements Listener {
 
+    // 엔크
     @EventHandler
     public void onExplosionDamage(EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
 
-        // 엔더 크리스탈 또는 리스폰 앵커가 폭발한 경우
         if (damager.getType() == EntityType.END_CRYSTAL) {
             double percent = ConfigHandler.explosionDamagePercent;
             percent = Math.max(0, Math.min(percent, 100));
@@ -25,6 +25,7 @@ public class ExplosionListener implements Listener {
         }
     }
 
+    // 리스폰앵커 && 침대
     @EventHandler
     public void onBlockExplosion(EntityDamageEvent event) {
         if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION) {

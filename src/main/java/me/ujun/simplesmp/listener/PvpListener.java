@@ -22,29 +22,43 @@ import java.util.*;
 
 public class PvpListener implements Listener {
 
+    private final JavaPlugin plugin;
     Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
     Map<UUID, Integer> playerExp = new HashMap<>();
     Map<UUID, Integer> playerLevel = new HashMap<>();
-
-    private final JavaPlugin plugin;
 
 
     public PvpListener(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
+    public static void removePlayerDisplay(UUID playerId) {
 
+        DisplayGroup group = SimpleSMP.playerDisplayGroup.get(playerId);
+
+        if (group.itemDisplay != null && !group.itemDisplay.isDead()) {
+            group.itemDisplay.remove();
+        }
+        if (group.interaction != null && !group.interaction.isDead()) {
+            group.interaction.remove();
+        }
+        if (group.armorStand != null && !group.armorStand.isDead()) {
+            group.armorStand.remove();
+        }
+
+        SimpleSMP.playerDisplayGroup.remove(playerId);
+    }
 
     @EventHandler
     private void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
         if (SimpleSMP.pvpPlayerTimer.containsKey(player.getUniqueId())) {
-           savedInventories.put(player.getUniqueId(), player.getInventory().getContents());
-           playerExp.put(player.getUniqueId(), player.getTotalExperience());
-           playerLevel.put(player.getUniqueId(), player.getLevel());
+            savedInventories.put(player.getUniqueId(), player.getInventory().getContents());
+            playerExp.put(player.getUniqueId(), player.getTotalExperience());
+            playerLevel.put(player.getUniqueId(), player.getLevel());
 
-           spawnPlayerDisplay(player);
+            spawnPlayerDisplay(player);
         }
     }
 
@@ -75,26 +89,6 @@ public class PvpListener implements Listener {
 
     }
 
-
-
-    public static void removePlayerDisplay(UUID playerId) {
-
-        DisplayGroup group = SimpleSMP.playerDisplayGroup.get(playerId);
-
-        if (group.itemDisplay != null && !group.itemDisplay.isDead()) {
-            group.itemDisplay.remove();
-        }
-        if (group.interaction != null && !group.interaction.isDead()) {
-            group.interaction.remove();
-        }
-        if (group.armorStand != null && !group.armorStand.isDead()) {
-            group.armorStand.remove();
-        }
-
-        SimpleSMP.playerDisplayGroup.remove(playerId);
-    }
-
-
     private ItemStack getPlayerHead(UUID uuid) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(uuid);
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
@@ -106,7 +100,7 @@ public class PvpListener implements Listener {
 
 
     public void spawnPlayerDisplay(Player player) {
-        Location base = player.getLocation().setRotation(player.getYaw()+180, 0);
+        Location base = player.getLocation().setRotation(player.getYaw() + 180, 0);
         UUID playerId = player.getUniqueId();
         String fightMessage = ConfigHandler.fightMessage;
         fightMessage = fightMessage.replace("%sec%", String.valueOf(SimpleSMP.pvpPlayerTimer.get(playerId)));
@@ -119,7 +113,7 @@ public class PvpListener implements Listener {
         itemDisplay.setItemStack(getPlayerHead(playerId));
 
         // 인터랙션
-        Interaction interaction = (Interaction) base.getWorld().spawn(base.clone(), Interaction.class, i -> {
+        Interaction interaction = base.getWorld().spawn(base.clone(), Interaction.class, i -> {
             i.setInteractionWidth(0.8F);
             i.setInteractionHeight(-0.8F);
             i.setResponsive(true);
@@ -148,9 +142,7 @@ public class PvpListener implements Listener {
     @EventHandler
     public void onInteract(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) return;
-        if (!(event.getEntity() instanceof Interaction)) return;
-
-        Interaction interaction = (Interaction) event.getEntity();
+        if (!(event.getEntity() instanceof Interaction interaction)) return;
 
         if (!SimpleSMP.interactionToPlayerMap.containsKey(interaction.getUniqueId())) {
             return;
@@ -165,8 +157,8 @@ public class PvpListener implements Listener {
         removePlayerDisplay(targetId);
         removeAttackerTimer(targetId);
 
-        int droppedExp = (int) Math.min(7 * playerLevel.get(targetId), playerExp.get(targetId));
-        ExperienceOrb orb = interaction.getLocation() .getWorld().spawn(interaction.getLocation(), ExperienceOrb.class);
+        int droppedExp = Math.min(7 * playerLevel.get(targetId), playerExp.get(targetId));
+        ExperienceOrb orb = interaction.getLocation().getWorld().spawn(interaction.getLocation(), ExperienceOrb.class);
         orb.setExperience(droppedExp);
 
         interaction.getWorld().playSound(interaction.getLocation(), Sound.ENTITY_PLAYER_DEATH, SoundCategory.PLAYERS, 1.0f, 1.0f);
@@ -209,17 +201,16 @@ public class PvpListener implements Listener {
             } else {
                 return;
             }
-        } else if (event.getDamager() instanceof  Player) {
+        } else if (event.getDamager() instanceof Player) {
             attacker = (Player) event.getDamager();
         } else {
             return;
         }
-        if (!(event.getEntity() instanceof Player)) return;
+        if (!(event.getEntity() instanceof Player damaged)) return;
 
 
         UUID attackerId = attacker.getUniqueId();
 
-        Player damaged = (Player) event.getEntity();
         UUID damagedId = damaged.getUniqueId();
 
         if (attacker.equals(damaged)) return;
@@ -269,13 +260,13 @@ public class PvpListener implements Listener {
         if (!SimpleSMP.pvpPlayerTimer.containsKey(player.getUniqueId())) {
             return;
         }
-            for (String blocked :ConfigHandler.fightBlockCommands) {
-                if (command.startsWith(blocked.toLowerCase())) {
-                    player.sendMessage(ChatColor.RED + "PVP 중에는 이 명령어를 사용할 수 없습니다!");
-                    event.setCancelled(true);
-                    return;
-                }
+        for (String blocked : ConfigHandler.fightBlockCommands) {
+            if (command.startsWith(blocked.toLowerCase())) {
+                player.sendMessage(ChatColor.RED + "PVP 중에는 이 명령어를 사용할 수 없습니다!");
+                event.setCancelled(true);
+                return;
             }
+        }
 
     }
 }

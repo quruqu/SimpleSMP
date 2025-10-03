@@ -1,6 +1,5 @@
 package me.ujun.simplesmp.listener;
 
-import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -56,12 +55,7 @@ public class PlayerDeathListener implements Listener {
         int amount = target.getAmount();
         int removeAmount = (amount > 1) ? random.nextInt(1, amount) : 1;
 
-        player.sendMessage(Component.text("아이템").color(NamedTextColor.RED)
-                .hoverEvent(target.asHoverEvent())
-                .append(Component.text("이 소실되었습니다 ("))
-                .append(Component.translatable(target.getType()))
-                .append(Component.text(String.format(" x%d)", removeAmount)))
-        );
+        player.sendMessage(Component.text("아이템").color(NamedTextColor.RED).hoverEvent(target.asHoverEvent()).append(Component.text("이 소실되었습니다 (")).append(Component.translatable(target.getType())).append(Component.text(String.format(" x%d)", removeAmount))));
 
         if (amount - removeAmount > 0) {
             target.setAmount(amount - removeAmount);
@@ -96,18 +90,17 @@ public class PlayerDeathListener implements Listener {
 
         // 장비 재질 기반 + 겉날개 + 삼지창
         switch (type) {
-            case NETHERITE_SWORD, NETHERITE_AXE, NETHERITE_PICKAXE,
-                 NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS:
+            case NETHERITE_SWORD, NETHERITE_AXE, NETHERITE_PICKAXE, NETHERITE_HELMET, NETHERITE_CHESTPLATE,
+                 NETHERITE_LEGGINGS, NETHERITE_BOOTS:
                 rarity = ItemRarity.COMMON;
                 weight += 45;
                 break;
-            case DIAMOND_SWORD, DIAMOND_AXE, DIAMOND_PICKAXE,
-                 DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS, DIAMOND_BOOTS, TRIDENT:
+            case DIAMOND_SWORD, DIAMOND_AXE, DIAMOND_PICKAXE, DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS,
+                 DIAMOND_BOOTS, TRIDENT:
                 rarity = ItemRarity.COMMON;
                 weight += 30;
                 break;
-            case IRON_SWORD, IRON_AXE, IRON_PICKAXE,
-                 IRON_HELMET, IRON_CHESTPLATE, IRON_LEGGINGS, IRON_BOOTS:
+            case IRON_SWORD, IRON_AXE, IRON_PICKAXE, IRON_HELMET, IRON_CHESTPLATE, IRON_LEGGINGS, IRON_BOOTS:
                 rarity = ItemRarity.COMMON;
                 weight += 15;
                 break;
@@ -122,7 +115,7 @@ public class PlayerDeathListener implements Listener {
         //희귀도 기반 (위의 장비는 반영 안됨)
         switch (rarity) {
             case EPIC -> weight += 50;
-            case RARE -> weight+= 20;
+            case RARE -> weight += 20;
             case UNCOMMON -> weight += 10;
         }
 

@@ -1,5 +1,7 @@
 package me.ujun.simplesmp.listener;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,7 +21,7 @@ public class EnderChestRestrictListener implements Listener {
             ItemStack current = event.getCurrentItem();
 
             if (isRestricted(cursor.getType()) || (current != null && isRestricted(current.getType()))) {
-                event.getWhoClicked().sendMessage(ChatColor.RED + "엔더 상자 보관이 제한된 아이템입니다");
+                event.getWhoClicked().sendMessage(Component.text("엔더 상자 보관이 제한된 아이템입니다").color(NamedTextColor.RED));
                 event.setCancelled(true);
             }
         }

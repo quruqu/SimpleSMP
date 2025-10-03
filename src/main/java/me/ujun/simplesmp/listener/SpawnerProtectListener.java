@@ -1,6 +1,8 @@
 package me.ujun.simplesmp.listener;
 
-import net.md_5.bungee.api.ChatMessageType;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,7 +29,8 @@ public class SpawnerProtectListener implements Listener {
             CreatureSpawner spawner = (CreatureSpawner) block.getState();
 
             if (spawner.getSpawnedType() == org.bukkit.entity.EntityType.BLAZE) {
-                event.getPlayer().sendMessage(ChatColor.RED + "블레이즈 스포너는 파괴할 수 없습니다");
+                event.getPlayer().sendMessage(Component.text("블레이즈 스포너는 파괴할 수 없습니다").color(NamedTextColor.RED));
+
                 event.setCancelled(true);
             }
         }

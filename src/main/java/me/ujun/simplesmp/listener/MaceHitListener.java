@@ -2,7 +2,6 @@ package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.config.ConfigHandler;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,7 +9,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class MaceHitListener implements Listener {
-
 
 
     @EventHandler(ignoreCancelled = true)
@@ -25,11 +23,9 @@ public class MaceHitListener implements Listener {
                 return;
             }
 
-
             int damage = (int) e.getDamage();
             p.sendMessage(String.valueOf(damage));
             p.setCooldown(Material.MACE, ConfigHandler.maceCooldownPerDamage * damage);
         }
     }
-
 }

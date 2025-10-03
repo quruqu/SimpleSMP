@@ -15,7 +15,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.*;
 
@@ -37,7 +36,7 @@ public class EndRestrictListener implements Listener {
                         loc = SimpleSMP.playerSpawnLocations.get(p.getUniqueId());
                     }
 
-                    p.sendMessage(ChatColor.RED + "엔드가 비활성화되어 강제퇴장됩니다");
+                    p.sendMessage(Component.text("엔드가 비활성화되어 강제퇴장됩니다").color(NamedTextColor.RED));
                     p.teleport(loc);
                 }
             }
@@ -60,7 +59,7 @@ public class EndRestrictListener implements Listener {
                 loc = SimpleSMP.playerSpawnLocations.get(p.getUniqueId());
             }
 
-            p.sendMessage(ChatColor.RED + "엔드가 비활성화되어 강제퇴장됩니다");
+            p.sendMessage(Component.text("엔드가 비활성화되어 강제퇴장됩니다").color(NamedTextColor.RED));
             p.teleport(loc);
         }
     }
