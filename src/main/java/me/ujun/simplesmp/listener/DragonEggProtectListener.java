@@ -4,11 +4,9 @@ import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import me.ujun.simplesmp.config.ConfigHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +18,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 
 public class DragonEggProtectListener implements Listener {
 
@@ -42,7 +41,24 @@ public class DragonEggProtectListener implements Listener {
     public void onItemRemove(EntityRemoveFromWorldEvent event) {
         if (!(event.getEntity() instanceof Item item)) return;
 
-        if (item.getItemStack().getType() == Material.DRAGON_EGG) {
+        boolean containsDragonEgg = false;
+        Material type = item.getItemStack().getType();
+
+        if (type == Material.DRAGON_EGG) containsDragonEgg = true;
+
+        if (Tag.SHULKER_BOXES.isTagged(type)) {
+            if (item.getItemStack().getItemMeta() instanceof BlockStateMeta meta) {
+                if (meta.getBlockState() instanceof ShulkerBox box) {
+                    for (ItemStack inside : box.getInventory().getContents()) {
+                        if (inside != null && inside.getType() == Material.DRAGON_EGG) {
+                            containsDragonEgg = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (containsDragonEgg) {
             World endWorld = Bukkit.getWorld("world_the_end");
             if (endWorld == null) return;
 

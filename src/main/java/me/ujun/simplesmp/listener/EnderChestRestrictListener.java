@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
@@ -20,12 +21,26 @@ public class EnderChestRestrictListener implements Listener {
             ItemStack cursor = event.getCursor();
             ItemStack current = event.getCurrentItem();
 
-            if (isRestricted(cursor.getType()) || (current != null && isRestricted(current.getType()))) {
+            boolean isHotbarItemRestricted = false;
+
+            if (event.getClick() == ClickType.NUMBER_KEY) {
+                int hotbarSlot = event.getHotbarButton();
+                ItemStack hotbarItem = event.getWhoClicked().getInventory().getItem(hotbarSlot);
+
+                if (hotbarItem != null) {
+                    isHotbarItemRestricted = isRestricted(hotbarItem.getType());
+                }
+            }
+
+            if (isRestricted(cursor.getType()) || (current != null && isRestricted(current.getType())) || isHotbarItemRestricted) {
                 event.getWhoClicked().sendMessage(Component.text("엔더 상자 보관이 제한된 아이템입니다").color(NamedTextColor.RED));
                 event.setCancelled(true);
             }
         }
     }
+
+
+
 
     private boolean isRestricted(Material type) {
         if (type == null) {

@@ -2,9 +2,12 @@ package me.ujun.simplesmp.listener;
 
 import me.ujun.simplesmp.SimpleSMP;
 import me.ujun.simplesmp.config.ConfigHandler;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -68,16 +71,48 @@ public class RandomSpawnListener implements org.bukkit.event.Listener {
     }
 
     @EventHandler
-    private void onFirstJoin(PlayerJoinEvent event) {
+    private void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+
+        if (event.getCause() != EntityDamageEvent.DamageCause.WORLD_BORDER) {
+            return;
+        }
+
+        World world = player.getWorld();
+        WorldBorder border = world.getWorldBorder();
+
+        boolean inside = border.isInside(player.getLocation());
+
+        if (!inside) {
+            player.sendMessage(Component.text("월드보더를 벗어나 스폰으로 이동합니다").color(NamedTextColor.RED));
+
+            Location spawnLocation = SimpleSMP.playerSpawnLocations.get(player.getUniqueId());
+
+            if (spawnLocation == null) {
+                spawnLocation = border.getCenter();
+            }
+
+            player.teleport(spawnLocation);
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    private void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
         if (!SimpleSMP.playerSpawnLocations.containsKey(player.getUniqueId())) {
             Location spawnLocation = randomLocation();
             player.teleport(spawnLocation);
             SimpleSMP.playerSpawnLocations.put(player.getUniqueId(), spawnLocation);
-
         }
+
     }
+
 
     public Location randomLocation() {
         World world = Bukkit.getWorld("world");

@@ -24,7 +24,7 @@ public class PlayerDeathListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        ItemStack[] contents = player.getInventory().getContents();
+        ItemStack[] contents = event.getDrops().toArray(new ItemStack[0]);
 
 
         if (player.getKiller() != null) {
@@ -57,22 +57,33 @@ public class PlayerDeathListener implements Listener {
 
         player.sendMessage(Component.text("아이템").color(NamedTextColor.RED).hoverEvent(target.asHoverEvent()).append(Component.text("이 소실되었습니다 (")).append(Component.translatable(target.getType())).append(Component.text(String.format(" x%d)", removeAmount))));
 
+
+
+        player.sendMessage(amount + "");
+
         if (amount - removeAmount > 0) {
             target.setAmount(amount - removeAmount);
         } else {
-            Inventory inv = player.getInventory();
 
-            for (int i = 0; i < inv.getSize(); i++) {
-                ItemStack item = inv.getItem(i);
-                if (item == null) {
-                    continue;
-                }
-
+            for (ItemStack item : contents) {
                 if (item.equals(target)) {
-                    inv.setItem(i, null);
-                    return;
+                    event.getDrops().remove(item);
                 }
             }
+
+//            Inventory inv = player.getInventory();
+//
+//            for (int i = 0; i < inv.getSize(); i++) {
+//                ItemStack item = inv.getItem(i);
+//                if (item == null) {
+//                    continue;
+//                }
+//
+//                if (item.equals(target)) {
+//                    inv.setItem(i, null);
+//                    return;
+//                }
+//            }
         }
     }
 
