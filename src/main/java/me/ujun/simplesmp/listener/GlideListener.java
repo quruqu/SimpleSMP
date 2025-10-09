@@ -33,19 +33,25 @@ public class GlideListener implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             int currentHour = LocalTime.now().getHour();
 
+            int start = ConfigHandler.elytraDisabledTimeStart;
+            int end = ConfigHandler.elytraDisabledTimeEnd;
+
+            int hourBeforeStart = (start == 0) ? 23 : (start - 1);
+
             if (currentHour != lastHour[0]) {
                 lastHour[0] = currentHour;
 
-                if (currentHour == ConfigHandler.elytraDisabledTimeStart - 1) {
+
+                if (currentHour == hourBeforeStart) {
                     Bukkit.broadcast(Component.text("1시간 후 겉날개 사용이 제한됩니다"));
-                } else if (currentHour == ConfigHandler.elytraDisabledTimeStart) {
+                } else if (currentHour == start) {
                     Bukkit.broadcast(Component.text("같날개 사용이 제한됩니다"));
-                } else if (currentHour == ConfigHandler.elytraDisabledTimeEnd) {
+                } else if (currentHour == end) {
                     Bukkit.broadcast(Component.text("같날개 사용 제한이 해제됩니다"));
                 }
             }
 
-            if (currentHour == ConfigHandler.elytraDisabledTimeStart - 1) {
+            if (currentHour == hourBeforeStart) {
                 int currentMinute = LocalTime.now().getMinute();
 
                 if (currentMinute != lastMinute[0]) {

@@ -53,8 +53,6 @@ public final class SimpleSMP extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new DragonEggProtectListener(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), this);
         Bukkit.getPluginManager().registerEvents(new ItemCraftListener(), this);
-
-         run();
     }
 
     @Override
@@ -65,48 +63,4 @@ public final class SimpleSMP extends JavaPlugin {
             PvpListener.removePlayerDisplay(id);
         }
     }
-
-
-
-    private void run() {
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
-            for (UUID uuid : new HashSet<>(pvpPlayerTimer.keySet())) {
-
-                int sec = pvpPlayerTimer.get(uuid);
-                Player player = Bukkit.getPlayer(uuid);
-                String fightMessage = ConfigHandler.fightMessage;
-                fightMessage = fightMessage.replace("%sec%", String.valueOf(sec));
-
-                if (sec == 0) {
-                    if (player != null) {
-                        player.sendActionBar(ConfigHandler.fightEndMessage);
-                    } else {
-                        PvpListener.removePlayerDisplay(uuid);
-                    }
-                    pvpPlayerTimer.remove(uuid);
-                    continue;
-                } else {
-                    if (player != null) {
-                        player.sendActionBar(fightMessage);
-                    }
-
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-
-                    if (!offlinePlayer.isOnline()) {
-                        DisplayGroup displayGroup = playerDisplayGroup.get(uuid);
-                        displayGroup.itemDisplay.setCustomName("§l" + offlinePlayer.getName() + ": " + fightMessage);
-                    }
-                }
-
-                pvpPlayerTimer.put(uuid, sec - 1);
-            }
-        }, 0L, 20L);
-
-
-
-        // todo
-        // 엔더 드래곤 버프
-        // 죽을 시 확률적으로 아이템 삭제
-    }
-
 }

@@ -3,9 +3,13 @@ package me.ujun.simplesmp.listener;
 import me.ujun.simplesmp.DisplayGroup;
 import me.ujun.simplesmp.SimpleSMP;
 import me.ujun.simplesmp.config.ConfigHandler;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,21 +24,62 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
+import static me.ujun.simplesmp.SimpleSMP.playerDisplayGroup;
+import static me.ujun.simplesmp.SimpleSMP.pvpPlayerTimer;
+
 public class PvpListener implements Listener {
 
-    private final JavaPlugin plugin;
+//    private final JavaPlugin plugin;
     Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
     Map<UUID, Integer> playerExp = new HashMap<>();
     Map<UUID, Integer> playerLevel = new HashMap<>();
+    Map<Player, BossBar> playerBars = new HashMap<>();
+    Map<Player, Integer> playerTicks = new HashMap<>();
 
 
     public PvpListener(JavaPlugin plugin) {
-        this.plugin = plugin;
+
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+
+            for (UUID uuid : new HashSet<>(pvpPlayerTimer.keySet())) {
+
+                int sec = pvpPlayerTimer.get(uuid);
+                Player player = Bukkit.getPlayer(uuid);
+                String fightMessage = ConfigHandler.fightMessage;
+                fightMessage = fightMessage.replace("%sec%", String.valueOf(sec));
+
+                if (sec == 0) {
+                    if (player != null) {
+                        removePersonalBar(player);
+                        player.sendActionBar(Component.text(ConfigHandler.fightEndMessage));
+                    } else {
+                        PvpListener.removePlayerDisplay(uuid);
+                    }
+                    pvpPlayerTimer.remove(uuid);
+                    continue;
+                } else {
+                    if (player != null) {
+                        setBar(player, fightMessage, (double) (sec) / (ConfigHandler.fightTime));
+                    }
+
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+
+                    if (!offlinePlayer.isOnline()) {
+                        DisplayGroup displayGroup = playerDisplayGroup.get(uuid);
+                        displayGroup.itemDisplay.setCustomName("§l" + offlinePlayer.getName() + ": " + fightMessage);
+                    }
+                }
+
+                pvpPlayerTimer.put(uuid, sec -1);
+
+            }
+
+        }, 0L, 20L);
     }
 
     public static void removePlayerDisplay(UUID playerId) {
 
-        DisplayGroup group = SimpleSMP.playerDisplayGroup.get(playerId);
+        DisplayGroup group = playerDisplayGroup.get(playerId);
 
         if (group.itemDisplay != null && !group.itemDisplay.isDead()) {
             group.itemDisplay.remove();
@@ -46,14 +91,16 @@ public class PvpListener implements Listener {
             group.armorStand.remove();
         }
 
-        SimpleSMP.playerDisplayGroup.remove(playerId);
+        playerDisplayGroup.remove(playerId);
     }
 
     @EventHandler
     private void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        if (SimpleSMP.pvpPlayerTimer.containsKey(player.getUniqueId())) {
+        if (pvpPlayerTimer.containsKey(player.getUniqueId())) {
+            removePersonalBar(player);
+
             savedInventories.put(player.getUniqueId(), player.getInventory().getContents());
             playerExp.put(player.getUniqueId(), player.getTotalExperience());
             playerLevel.put(player.getUniqueId(), player.getLevel());
@@ -66,15 +113,22 @@ public class PvpListener implements Listener {
     private void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (SimpleSMP.playerDisplayGroup.containsKey(player.getUniqueId())) {
-            DisplayGroup displayGroup = SimpleSMP.playerDisplayGroup.get(player.getUniqueId());
+        if (pvpPlayerTimer.containsKey(player.getUniqueId())) {
+            String fightMessage = ConfigHandler.fightMessage;
+            fightMessage = fightMessage.replace("%sec%", String.valueOf(pvpPlayerTimer.get(player.getUniqueId())));
+
+            setBar(player, fightMessage, (double) pvpPlayerTimer.get(player.getUniqueId()) / (ConfigHandler.fightTime));
+        }
+
+        if (playerDisplayGroup.containsKey(player.getUniqueId())) {
+            DisplayGroup displayGroup = playerDisplayGroup.get(player.getUniqueId());
 
             Location loc = displayGroup.armorStand.getLocation();
             player.teleport(loc);
         }
 
         if (SimpleSMP.loggedOutDeadPlayers.contains(player.getUniqueId())) {
-            Bukkit.broadcastMessage(ChatColor.RED + "전투 도중 나간 플레이어가 사망 처리되었습니다!");
+            Bukkit.broadcast(Component.text("전투 도중 나간 플레이어가 사망 처리되었습니다!").color(NamedTextColor.RED));
             player.getInventory().clear();
             player.setExp(0);
             player.setLevel(0);
@@ -82,7 +136,7 @@ public class PvpListener implements Listener {
             SimpleSMP.loggedOutDeadPlayers.remove(player.getUniqueId());
         }
 
-        if (SimpleSMP.playerDisplayGroup.containsKey(player.getUniqueId())) {
+        if (playerDisplayGroup.containsKey(player.getUniqueId())) {
             removePlayerDisplay(player.getUniqueId());
         }
 
@@ -103,7 +157,7 @@ public class PvpListener implements Listener {
         Location base = player.getLocation().setRotation(player.getYaw() + 180, 0);
         UUID playerId = player.getUniqueId();
         String fightMessage = ConfigHandler.fightMessage;
-        fightMessage = fightMessage.replace("%sec%", String.valueOf(SimpleSMP.pvpPlayerTimer.get(playerId)));
+        fightMessage = fightMessage.replace("%sec%", String.valueOf(pvpPlayerTimer.get(playerId)));
 
         // 머리
         ItemDisplay itemDisplay = (ItemDisplay) base.getWorld().spawnEntity(base.clone().add(0, 0.5, 0), EntityType.ITEM_DISPLAY);
@@ -124,7 +178,7 @@ public class PvpListener implements Listener {
         stand.setGravity(true);
         stand.setSilent(true);
         stand.setInvulnerable(true);
-        stand.getAttribute(Attribute.SCALE).setBaseValue(0.255F);
+        Objects.requireNonNull(stand.getAttribute(Attribute.SCALE)).setBaseValue(0.255F);
 
         stand.addPassenger(itemDisplay);
         stand.addPassenger(interaction);
@@ -136,7 +190,7 @@ public class PvpListener implements Listener {
         group.armorStand = stand;
 
         SimpleSMP.interactionToPlayerMap.put(interaction.getUniqueId(), playerId);
-        SimpleSMP.playerDisplayGroup.put(player.getUniqueId(), group);
+        playerDisplayGroup.put(player.getUniqueId(), group);
     }
 
     @EventHandler
@@ -152,8 +206,8 @@ public class PvpListener implements Listener {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetId);
 
         dropOfflinePlayerInventory(targetId, interaction.getLocation());
-        SimpleSMP.pvpPlayerTimer.remove(targetId);
-        SimpleSMP.pvpPlayerTimer.remove(event.getDamager().getUniqueId());
+        pvpPlayerTimer.remove(targetId);
+//        pvpPlayerTimer.remove(event.getDamager().getUniqueId());
         removePlayerDisplay(targetId);
         removeAttackerTimer(targetId);
 
@@ -163,7 +217,7 @@ public class PvpListener implements Listener {
 
         interaction.getWorld().playSound(interaction.getLocation(), Sound.ENTITY_PLAYER_DEATH, SoundCategory.PLAYERS, 1.0f, 1.0f);
         SimpleSMP.loggedOutDeadPlayers.add(targetId);
-        Bukkit.broadcastMessage(ChatColor.RED + target.getName() + "님이 전투 도중 퇴장해 사망했습니다.");
+        Bukkit.broadcast(Component.text(target.getName() + "님이 전투 도중 퇴장해 사망했습니다.").color(NamedTextColor.RED));
 
         event.setCancelled(true);
     }
@@ -216,8 +270,8 @@ public class PvpListener implements Listener {
         if (attacker.equals(damaged)) return;
 
 
-        SimpleSMP.pvpPlayerTimer.put(attackerId, ConfigHandler.fightTime);
-        SimpleSMP.pvpPlayerTimer.put(damagedId, ConfigHandler.fightTime);
+        pvpPlayerTimer.put(attackerId, ConfigHandler.fightTime);
+        pvpPlayerTimer.put(damagedId, ConfigHandler.fightTime);
 
         SimpleSMP.lastAttackers.computeIfAbsent(damagedId, k -> new HashSet<>()).add(attackerId);
 
@@ -225,29 +279,62 @@ public class PvpListener implements Listener {
         String fightMessage = ConfigHandler.fightMessage;
         fightMessage = fightMessage.replace("%sec%", String.valueOf(ConfigHandler.fightTime));
 
-        attacker.sendActionBar(fightMessage);
-        damaged.sendActionBar(fightMessage);
+//        attacker.sendActionBar(Component.text(fightMessage));
+//        damaged.sendActionBar(Component.text(fightMessage));
+        setBar(attacker, fightMessage, 1.0);
+        setBar(damaged, fightMessage, 1.0);
 
+
+    }
+
+    public void setBar(Player player, String title, double progress) {
+        if (playerBars.containsKey(player)) {
+            BossBar bar = playerBars.get(player);
+
+            bar.setTitle(title);
+            bar.setProgress(progress);
+            return;
+        }
+
+        BossBar bar = Bukkit.createBossBar(title,
+                BarColor.RED,
+                BarStyle.SOLID
+        );
+        bar.addPlayer(player);
+        bar.setProgress(1.0);
+        bar.setVisible(true);
+        playerBars.put(player, bar);
+    }
+
+    public void removePersonalBar(Player player) {
+//        player.sendMessage("바 삭제");
+        BossBar bar = playerBars.remove(player);
+        if (bar != null) {
+            bar.removeAll();
+        }
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player dead = event.getPlayer();
 
-        SimpleSMP.pvpPlayerTimer.remove(dead.getUniqueId());
+        pvpPlayerTimer.remove(dead.getUniqueId());
         removeAttackerTimer(dead.getUniqueId());
+        removePersonalBar(dead);
     }
 
     private void removeAttackerTimer(UUID deadID) {
         if (SimpleSMP.lastAttackers.containsKey(deadID)) {
             for (UUID uuid : new ArrayList<>(SimpleSMP.lastAttackers.get(deadID))) {
-                if (SimpleSMP.pvpPlayerTimer.containsKey(uuid)) {
+                if (pvpPlayerTimer.containsKey(uuid)) {
                     Player player = Bukkit.getPlayer(uuid);
-                    player.sendActionBar(ConfigHandler.fightEndMessage);
+                    if (player != null) {
+                        removePersonalBar(player);
+                        player.sendActionBar(Component.text(ConfigHandler.fightEndMessage));
+                    }
                 }
-                SimpleSMP.pvpPlayerTimer.remove(uuid);
+                pvpPlayerTimer.remove(uuid);
             }
-
             SimpleSMP.lastAttackers.remove(deadID);
         }
     }
@@ -257,12 +344,12 @@ public class PvpListener implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage().toLowerCase();
 
-        if (!SimpleSMP.pvpPlayerTimer.containsKey(player.getUniqueId())) {
+        if (!pvpPlayerTimer.containsKey(player.getUniqueId())) {
             return;
         }
         for (String blocked : ConfigHandler.fightBlockCommands) {
             if (command.startsWith(blocked.toLowerCase())) {
-                player.sendMessage(ChatColor.RED + "PVP 중에는 이 명령어를 사용할 수 없습니다!");
+                player.sendMessage(Component.text("PVP 중에는 이 명령어를 사용할 수 없습니다!").color(NamedTextColor.RED));
                 event.setCancelled(true);
                 return;
             }
